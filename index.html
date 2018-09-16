@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>image-replace-color</title>
+    <script src="./dist/image-replace-color.umd.js"></script>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+
+        body {
+            font-family: Avenir, Helvetica, Arial, sans-serif;
+        }
+
+        #wrap {
+            display: flex;
+            max-width: 800px;
+            height: 100%;
+            align-items: center;
+            margin: auto;
+        }
+
+        #wrap>* {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sample {
+            display: inline-block;
+            text-align: center;
+        }
+
+        .sample>.color0,
+        .sample>.color1 {
+            height: 70px;
+            width: 70px;
+        }
+
+        .sample>.color0 {
+            background-color: black;
+        }
+
+        .sample>.color1 {
+            background-color: white;
+            border: 1px dashed #333;
+        }
+
+        .transform {
+            text-align: center;
+            flex-wrap: wrap;
+            flex-direction: column;
+        }
+
+        .color-line {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .color-line+.color-line {
+            margin-bottom: 0;
+        }
+
+        .target [type="color"] {
+            height: 70px;
+            width: 70px;
+        }
+
+        .color-text {
+            font-size: 13px;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id="wrap">
+        <div>
+            <img src="./test-img.png" alt="">
+        </div>
+        <div class="transform">
+            <div class="color-line">
+                <div class="sample">
+                    <div class="color0"></div>
+                    <div class="color-text">#000000</div>
+                </div>
+                =>
+                <div class="target">
+                    <input type="color" class="color0" data-index="0">
+                    <div class="color-text"></div>
+                </div>
+            </div>
+            <div class="color-line">
+                <div class="sample">
+                    <div class="color1"></div>
+                    <div class="color-text">#FFFFFF</div>
+                </div>
+                =>
+                <div class="target">
+                    <input type="color" class="color1" data-index="1">
+                    <div class="color-text"></div>
+                </div>
+            </div>
+        </div>
+        <div>
+            <img id="output">
+        </div>
+    </div>
+
+    <script>
+        let colors = [];
+
+        function setTargetColor(index, color) {
+            document.querySelector(".target .color" + index).value = color;
+            document.querySelector(".target .color" + index + "+.color-text").textContent = color;
+            colors[index] = color;
+            render();
+        }
+
+        setTargetColor(0, '#305591');
+        setTargetColor(1, '#8af3a9');
+        document.querySelectorAll(".target input").forEach((dom) => {
+            dom.addEventListener('input', function (e) {
+                setTargetColor(e.target.dataset.index,e.target.value);                
+            });
+        });
+
+
+        function hexToRgb(hex) {
+            return hex.substring(1).match(/.{2}/g)
+                .map(x => parseInt(x, 16))
+        }
+
+
+        function render() {
+            if(colors.length<2){
+                return ;
+            }
+            ImageReplaceColor.default("./test-img.png", [
+                [
+                    [0, 0, 0],
+                    hexToRgb(colors[0])
+                ],
+                [
+                    [255, 255, 255],
+                    hexToRgb(colors[1])
+                ]
+            ]).then((dataUrl) => {
+                document.querySelector("#output").setAttribute('src', dataUrl)
+            });
+
+        }
+        render();
+
+    </script>
+</body>
+
+</html>
